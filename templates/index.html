@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GCI Detector</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      #input {
+        display: block;
+        margin: 20px 0;
+        padding: 10px;
+        width: 100%;
+        height: 50%;
+        box-sizing: border-box;
+        font-size: 14px;
+      }
+
+      #submit {
+        display: block;
+        margin: 20px 0;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #4CAF50;
+        color: #fff;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+      }
+
+      #output {
+        margin: 20px 0;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 14px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+      }
+
+      .copy-button {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GCI Detector</h1>
+    <p>Enter your text below:</p>
+    <textarea id="input"></textarea>
+    <button id="submit">Extract GCIs</button>
+    <div id="output"></div>
+    <script>
+      const button = document.getElementById('submit');
+      const input = document.getElementById('input');
+      const output = document.getElementById('output');
+
+      button.addEventListener('click', async () => {
+        const text = input.value.trim();
+        if (text.length > 0) {
+          try {
+            const data = new FormData();
+            data.append('input', text);
+            const response = await fetch('http://127.0.0.1:3333/gci_detector', {
+              method: 'POST',
+              body: data,
+            });
+            const outputText = await response.text();
+            output.innerHTML = outputText;
+            addCopyButtons();
+          } catch (error) {
+            output.innerHTML = `Error: ${error}`;
+          }
+        }
+      });
+
+      function addCopyButtons() {
+        const paragraphs = output.getElementsByTagName('p');
+        for (let i = 0; i < paragraphs.length; i++) {
+          const paragraph = paragraphs[i];
+          const button = document.createElement('span');
+          button.innerHTML = '<i class="fa fa-copy"></i>';
+          button.classList.add('copy-button');
+          button.addEventListener('click', () => {
+            const range = document.createRange();
+            range.selectNode(paragraph);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('copy');
+            selection.removeAllRanges();
+          });
+          paragraph.parentNode.insertBefore(button,paragraph);
+        }
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+  </body>
+</html>
